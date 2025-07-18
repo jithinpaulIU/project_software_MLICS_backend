@@ -1,7 +1,5 @@
-// controllers/authController.js
 const jwt = require("jsonwebtoken");
-const db = require("../config/db");
-const User = db.User;
+const User = require("../mics_models/user");
 
 const AuthController = {
   login: async (req, res) => {
@@ -17,22 +15,26 @@ const AuthController = {
 
       // Authenticate user
       const user = await User.authenticate(email, password);
+      console.log("user", user);
 
       // Generate JWT token
       const token = jwt.sign(
-        { userId: user.id, email: user.email },
+        { id: user.id, email: user.email, role: user.role },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
 
+      // Return success response (exclude sensitive data)
       res.json({
         status: true,
         message: "Login successful",
         token,
         user: {
           id: user.id,
+          firstName: user.first_name,
+          lastName: user.last_name,
           email: user.email,
-          // exclude password here
+          role: user.role,
         },
       });
     } catch (error) {
