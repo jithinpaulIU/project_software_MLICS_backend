@@ -1,6 +1,6 @@
 const User = require("../mics_models/user");
 const Lab = require("../mics_models/lab");
-const Doctor = require("../mics_models/doctor");
+// const Doctor = require("../mics_models/doctor");
 const LabRequest = require("../mics_models/labRequest");
 const bcrypt = require("bcryptjs");
 
@@ -153,7 +153,7 @@ const AdminController = {
 
   getAuthRequests: async (req, res) => {
     try {
-      const requests = await Doctor.getAuthRequests();
+      const requests = await User.getAuthRequests();
       res.json({ status: true, data: requests });
     } catch (error) {
       res.status(500).json({ status: false, message: error.message });

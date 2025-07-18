@@ -41,6 +41,13 @@ const User = {
     return result.rows[0];
   },
 
+  findByEmail: async (email) => {
+    const result = await db.query(
+      "SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL",
+      [email]
+    );
+    return result.rows[0];
+  },
   findById: async (id) => {
     const result = await db.query(
       "SELECT * FROM users WHERE id = $1 AND deleted_at IS NULL",
@@ -88,6 +95,23 @@ const User = {
       id,
     ]);
     return true;
+  },
+
+  // NEW: Authentication Method
+  authenticate: async (email, password) => {
+    const user = await User.findByEmail(email);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Compare plaintext password with stored hash
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new Error("Invalid password");
+    }
+
+    return user;
   },
 };
 
