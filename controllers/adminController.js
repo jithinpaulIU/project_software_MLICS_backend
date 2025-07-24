@@ -59,13 +59,14 @@ const AdminController = {
   updateDoctor: async (req, res) => {
     try {
       const { id } = req.params;
-      const { username, mobileNumber: phone } = req.body;
+      const { username, mobileNumber: phone, countryCode } = req.body;
 
       const updatedDoctor = await User.update(id, {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         username,
         phone,
+        countryCode,
       });
 
       res.json({
@@ -81,7 +82,34 @@ const AdminController = {
   deleteDoctor: async (req, res) => {
     try {
       const { id } = req.body;
-      await User.softDelete(id);
+
+      if (!id) {
+        return res.status(400).json({
+          status: false,
+          message: "Doctor ID is required",
+        });
+      }
+
+      // Fetch user by ID
+      const doctor = await User.findById(id);
+
+      if (!doctor) {
+        return res.status(404).json({
+          status: false,
+          message: "Doctor not found or already deleted",
+        });
+      }
+
+      // Proceed to soft delete
+      const result = await User.softDelete(id);
+
+      if (result.affected === 0) {
+        return res.status(500).json({
+          status: false,
+          message: "Failed to delete doctor",
+        });
+      }
+
       res.json({ status: true, message: "Doctor deleted successfully" });
     } catch (error) {
       res.status(500).json({ status: false, message: error.message });
