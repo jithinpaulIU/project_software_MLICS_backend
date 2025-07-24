@@ -13,7 +13,6 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("decoded", decoded);
 
     // CORRECTED: Call findById with just the ID
     const user = await User.findById(decoded.id);

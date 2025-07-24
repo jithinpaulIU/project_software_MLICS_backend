@@ -15,7 +15,6 @@ const AuthController = {
 
       // Authenticate user
       const user = await User.authenticate(email, password);
-      console.log("user", user);
 
       // Generate JWT token
       const token = jwt.sign(
