@@ -66,7 +66,7 @@ const User = {
 
   getAllDoctors: async () => {
     const result = await db.query(
-      "SELECT id, first_name, last_name, username, email, phone, status, ssn FROM users WHERE role = 'Doctor' AND deleted_at IS NULL"
+      "SELECT id, first_name, last_name, username, email, phone, status, ssn, country_code FROM users WHERE role = 'Doctor' AND deleted_at IS NULL"
     );
     return result.rows;
   },
@@ -80,11 +80,43 @@ const User = {
   },
 
   update: async (id, userData) => {
-    const { firstName, lastName, username, phone } = userData;
-    const result = await db.query(
-      "UPDATE users SET first_name = $1, last_name = $2, username = $3, phone = $4, updated_at = CURRENT_TIMESTAMP WHERE id = $5 RETURNING *",
-      [firstName, lastName, username, phone, id]
+    const { firstName, lastName, username, phone, countryCode } = userData;
+
+    // First check if the user exists and isn't soft-deleted
+    const checkResult = await db.query(
+      "SELECT deleted_at FROM users WHERE id = $1",
+      [id]
     );
+
+    if (checkResult.rows.length === 0) {
+      throw new Error("User not found");
+    }
+
+    if (checkResult.rows[0].deleted_at !== null) {
+      throw new Error("Update not possible - user is deactivated");
+    }
+
+    // Proceed with update if not soft-deleted
+    const result = await db.query(
+      `UPDATE users 
+     SET first_name = $1, 
+         last_name = $2, 
+         username = $3, 
+         phone = $4, 
+         country_code = $5, 
+         updated_at = CURRENT_TIMESTAMP 
+     WHERE id = $6 
+     AND deleted_at IS NULL
+     RETURNING *`,
+      [firstName, lastName, username, phone, countryCode, id]
+    );
+
+    if (result.rows.length === 0) {
+      throw new Error(
+        "Update failed - user may have been deactivated during the operation"
+      );
+    }
+
     return result.rows[0];
   },
 

@@ -10,8 +10,8 @@ router.use(roleMiddleware(["Admin"]));
 // Doctor management
 router.post("/users/addDoctor", AdminController.addDoctor);
 router.get("/users/doctors", AdminController.listDoctors);
-router.post("/users/update", AdminController.updateDoctor);
-router.post("/users/delete", AdminController.deleteDoctor);
+router.put("/users/drupdate/:id", AdminController.updateDoctor);
+router.delete("/users/drdelete", AdminController.deleteDoctor);
 
 // Lab management
 router.post("/lab/addLab", AdminController.addLab);
