@@ -80,7 +80,8 @@ const User = {
   },
 
   update: async (id, userData) => {
-    const { firstName, lastName, username, phone, countryCode } = userData;
+    const { firstName, lastName, username, phone, countryCode, email, ssn } =
+      userData;
 
     // First check if the user exists and isn't soft-deleted
     const checkResult = await db.query(
@@ -104,22 +105,17 @@ const User = {
          username = $3, 
          phone = $4, 
          country_code = $5, 
+         email = $6,
+         ssn = $7,
          updated_at = CURRENT_TIMESTAMP 
-     WHERE id = $6 
+     WHERE id = $8 
      AND deleted_at IS NULL
      RETURNING *`,
-      [firstName, lastName, username, phone, countryCode, id]
+      [firstName, lastName, username, phone, countryCode, email, ssn, id]
     );
-
-    if (result.rows.length === 0) {
-      throw new Error(
-        "Update failed - user may have been deactivated during the operation"
-      );
-    }
 
     return result.rows[0];
   },
-
   updatePassword: async (id, password) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     await db.query("UPDATE users SET password = $1 WHERE id = $2", [

@@ -33,6 +33,7 @@ const DoctorController = {
 
       res.json({ status: true, message: "OTP sent successfully" });
     } catch (error) {
+      console.log(error);
       res.status(500).json({ status: false, message: error.message });
     }
   },
