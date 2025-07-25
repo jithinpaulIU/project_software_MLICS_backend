@@ -59,7 +59,7 @@ const AdminController = {
   updateDoctor: async (req, res) => {
     try {
       const { id } = req.params;
-      const { username, mobileNumber: phone, countryCode } = req.body;
+      const { username, phone, countryCode, email, ssn } = req.body;
 
       const updatedDoctor = await User.update(id, {
         firstName: req.body.firstName,
@@ -67,6 +67,8 @@ const AdminController = {
         username,
         phone,
         countryCode,
+        email,
+        ssn,
       });
 
       res.json({
