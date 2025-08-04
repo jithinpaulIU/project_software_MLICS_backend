@@ -1,6 +1,6 @@
-const db = require("../config/db");
 const OTP = {
   create: async (doctorId, patientSSN, patientEmail, otp, expiresAt) => {
+    console.log(doctorId, patientSSN, patientEmail, otp, expiresAt);
     const result = await db.query(
       "INSERT INTO otp_requests (doctor_id, patient_ssn, patient_email, otp, expires_at) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [doctorId, patientSSN, patientEmail, otp, expiresAt]
@@ -17,7 +17,9 @@ const OTP = {
   },
 
   markAsUsed: async (id) => {
-    await db.query("UPDATE otps SET is_used = true WHERE id = $1", [id]);
+    await db.query("UPDATE otp_requests SET is_used = true WHERE id = $1", [
+      id,
+    ]);
     return true;
   },
 };

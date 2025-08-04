@@ -3,7 +3,7 @@ const db = require("../config/db");
 const ServiceRequest = {
   create: async (doctorId, patientSSN, patientPhone, type) => {
     const result = await db.query(
-      "INSERT INTO otp_requests (doctor_id, patient_ssn, patient_phone, type) VALUES ($1, $2, $3, $4) RETURNING *",
+      "INSERT INTO service_requests (doctor_id, patient_ssn, patient_phone, type) VALUES ($1, $2, $3, $4) RETURNING *",
       [doctorId, patientSSN, patientPhone, type]
     );
     return result.rows[0];
@@ -11,7 +11,7 @@ const ServiceRequest = {
 
   getByDoctor: async (doctorId) => {
     const result = await db.query(
-      "SELECT * FROM otp_requests WHERE doctor_id = $1 ORDER BY created_at DESC",
+      "SELECT * FROM service_requests WHERE doctor_id = $1 ORDER BY created_at DESC",
       [doctorId]
     );
     return result.rows;
