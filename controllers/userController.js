@@ -59,11 +59,12 @@ function sendOtpSchema(req, res, next) {
 }
 
 function validatePatientSchema(req, res, next) {
+  console.log();
   const schema = Joi.object({
     SSN: Joi.number().required(),
     otp: Joi.string().empty(""),
   });
-  validateRequest(req, next, schema);
+  validatePatient(req, next, schema);
 }
 
 function testlistSchema(req, res, next) {

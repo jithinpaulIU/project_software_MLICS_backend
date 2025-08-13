@@ -18,13 +18,14 @@ const DoctorController = {
 
   requestOTP: async (req, res) => {
     try {
-      console.log("req", req);
       const { SSN, email } = req.body;
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
       // In a real app, send OTP to email
-      console.log(`OTP for ${email}: ${otp}`);
+      console.log(
+        `OTP for is ${email}: ${otp}, ${req.body}, ${SSN}, ${email}, ${otp}, ${expiresAt}`
+      );
 
       // Store OTP in database
       await OTP.create(req.user.id, SSN, email, otp, expiresAt);
@@ -41,13 +42,15 @@ const DoctorController = {
 
   submitOTP: async (req, res) => {
     try {
-      const { SSN, otp } = req.body;
-      const patientMobile = req.body.MobileNo || req.body.mobileNo;
+      const { SSN, otp, email } = req.body;
+      // const patientMobile = req.body.email || req.body.mobileNo;
+      console.log(req.body, req.user.id);
 
       const otpRecord = await OTP.findByDetails(
         req.user.id,
         SSN,
-        patientMobile,
+        email,
+        // patientMobile,
         otp
       );
       if (!otpRecord) {
@@ -62,13 +65,13 @@ const DoctorController = {
       await ServiceRequest.create(
         req.user.id,
         SSN,
-        patientMobile,
+        email,
         "authenticationRequest"
       );
 
       // Generate auth token
       const authToken = jwt.sign(
-        { doctorId: req.user.id, patientSSN: SSN, patientMobile },
+        { doctorId: req.user.id, patientSSN: SSN, email },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );

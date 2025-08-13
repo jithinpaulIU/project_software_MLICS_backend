@@ -8,7 +8,7 @@ router.use(authMiddleware);
 router.use(roleMiddleware(["Doctor"]));
 
 // Labs
-router.get("/labs", DoctorController.getLabs);
+router.get("/user/labs", DoctorController.getLabs);
 
 // OTP
 router.post("/user/validateuseremail", DoctorController.requestOTP);
