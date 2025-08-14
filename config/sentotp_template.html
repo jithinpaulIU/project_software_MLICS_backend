@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MICR OTP Verification</title>
+  <style>
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      min-width: 100%;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      width: 90%;
+      padding: 20px 0;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .header {
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .logo {
+      font-size: 1.4em;
+      color: #00466a;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .otp-code {
+      background: #00466a;
+      margin: 20px auto;
+      width: fit-content;
+      padding: 10px 20px;
+      color: #fff;
+      border-radius: 4px;
+      font-size: 1.5em;
+      letter-spacing: 2px;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
+      text-align: right;
+      color: #aaa;
+      font-size: 0.8em;
+    }
+    .responsive-table {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <table class="responsive-table" role="presentation" cellspacing="0" cellpadding="0" border="0">
+    <tr>
+      <td align="center">
+        <div class="container">
+          <div class="header">
+            <a href="https://www.yourdomain.com" class="logo">Greetings from MICR</a>
+          </div>
+          
+          <p>Please use the following OTP to complete your verification. This OTP is valid for 5 minutes.</p>
+          
+          <div class="otp-code">{{otp}}</div>
+          
+          <p>If you didn't request this OTP, please ignore this email.</p>
+          
+          <p style="font-size:0.9em;">Regards,<br />MICR System</p>
+          
+          <div class="footer">
+            <p>Medical Lab Integration Cloud Services Team</p>
+            <p>© 2025 MLICS. All rights reserved.</p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

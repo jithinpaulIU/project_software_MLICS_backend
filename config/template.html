@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Account Credentials Update</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f9fc;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .header {
+            background-color: #00466a;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header img {
+            max-width: 180px;
+            height: auto;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #00466a;
+            font-size: 24px;
+            margin-top: 0;
+        }
+        
+        .credentials {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        
+        .credential-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .credential-label {
+            font-weight: bold;
+            color: #00466a;
+            min-width: 100px;
+        }
+        
+        .credential-value {
+            font-family: monospace;
+            background-color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #e1e5eb;
+        }
+        
+        .note {
+            background-color: #f8f9fa;
+            border-left: 4px solid #00466a;
+            padding: 15px;
+            margin: 25px 0;
+            font-size: 14px;
+        }
+        
+        .footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .footer a {
+            color: #fff;
+            text-decoration: underline;
+        }
+        
+        /* Responsive styles */
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .credential-row {
+                flex-direction: column;
+            }
+            
+            .credential-label {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://cybro-tracker.netlify.app/images/logo.svg" alt="MICR Logo">
+        </div>
+        
+        <div class="content">
+            <h1>Account Credentials Updated</h1>
+            
+            <p>Dear <%= user %>,</p>
+            
+            <p>Your account password has been successfully updated. Below are your latest credentials:</p>
+            
+            <div class="credentials">
+                <div class="credential-row">
+                    <div class="credential-label">Username:</div>
+                    <div class="credential-value"><%= email %></div>
+                </div>
+                
+                <div class="credential-row">
+                    <div class="credential-label">Password:</div>
+                    <div class="credential-value"><%= password %></div>
+                </div>
+            </div>
+            
+            <div class="note">
+                <strong>Note:</strong> For security reasons, please keep your credentials confidential and consider changing your password periodically.
+            </div>
+            
+            <p>If you didn't request this change, please contact our support team immediately.</p>
+            
+            <p>Best regards,<br>Medical Lab Integration Cloud Services Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 Medical Lab Integration Cloud Services. All rights reserved.</p>
+            <p>
+                <a href="#">Privacy Policy</a> | 
+                <a href="#">Terms of Service</a> | 
+                <a href="#">Contact Us</a>
+            </p>
+            <p>
+                <a href="#">Unsubscribe</a> from these emails
+            </p>
+        </div>
+    </div>
+</body>
+</html>
