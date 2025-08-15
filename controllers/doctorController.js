@@ -111,6 +111,7 @@ const DoctorController = {
   },
 
   getTestResults: async (req, res) => {
+    console.log("hello", req);
     try {
       const { SSN, MobileNo, BearerToken } = req.query;
       const patientMobile = MobileNo || req.query.mobileNo;
