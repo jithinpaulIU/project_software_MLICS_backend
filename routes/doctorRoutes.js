@@ -15,7 +15,7 @@ router.post("/user/validateuseremail", DoctorController.requestOTP);
 router.post("/user/authenticateuser", DoctorController.submitOTP);
 
 // Tests
-router.get("/user/testList", DoctorController.getTestResults);
+router.post("/user/testList", DoctorController.getTestResults);
 router.post("/user/lab/TestResult", DoctorController.getTestResult);
 
 // Authentication request
