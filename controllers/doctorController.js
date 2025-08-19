@@ -112,30 +112,134 @@ const DoctorController = {
 
   getTestResults: async (req, res) => {
     try {
-      const { SSN, MobileNo, BearerToken } = req.query;
-      const patientMobile = MobileNo || req.query.mobileNo;
+      // Extract token and labid from request body
+      const { token, labid } = req.body;
 
-      const results = await Test.getTestResults(
-        SSN,
-        patientMobile,
-        BearerToken
+      // Verify and decode the token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log("Decoded token:", decoded);
+
+      // Extract patient details from decoded token
+      const { patientSSN, email, doctorId } = decoded;
+
+      // Convert to correct types
+      const ssn = parseInt(patientSSN);
+      const labId = parseInt(labid);
+
+      if (isNaN(ssn)) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid SSN format",
+        });
+      }
+
+      if (isNaN(labId)) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid lab ID format",
+        });
+      }
+
+      // Get test results and lab details from database
+      const { testResults, labDetails } = await Test.getTestResults(
+        ssn,
+        email,
+        labId
       );
+
+      if (!testResults || testResults.length === 0) {
+        return res.status(404).json({
+          status: false,
+          message:
+            "No test results found for this patient at the specified lab",
+        });
+      }
+
+      if (!labDetails) {
+        return res.status(404).json({
+          status: false,
+          message: "Lab details not found",
+        });
+      }
 
       res.json({
         status: true,
-        SSN,
-        testList: results.map((r) => ({
+        doctorId,
+        labDetails: {
+          id: labDetails.id,
+          name: labDetails.name,
+          address: labDetails.address,
+          email: labDetails.email,
+          phone: labDetails.phone,
+          status: labDetails.status,
+          totalRequests: labDetails.total_req,
+          successRate: labDetails.success_rate,
+        },
+        patientSSN: ssn,
+        patientEmail: email,
+        testList: testResults.map((r) => ({
           testID: r.id,
           type: r.type,
-          tested_on: r.tested_on,
-          Status: r.status,
+          tested_on: r.created_at,
+          status: r.status,
+          result: r.result,
+          url: r.url,
+          labId: r.lab,
         })),
       });
     } catch (error) {
-      res.status(500).json({ status: false, message: error.message });
+      console.error("Error in getTestResults:", error);
+
+      if (error.name === "JsonWebTokenError") {
+        return res.status(401).json({
+          status: false,
+          message: "Invalid token",
+        });
+      }
+      if (error.name === "TokenExpiredError") {
+        return res.status(401).json({
+          status: false,
+          message: "Token expired",
+        });
+      }
+      res.status(500).json({
+        status: false,
+        message: error.message || "Failed to retrieve test results",
+      });
     }
   },
 
+  getTestResult: async (req, res) => {
+    try {
+      const { SSN, mobileNo, testID } = req.body;
+
+      const result = await Test.getTestResultById(testID, SSN, mobileNo);
+      if (!result) {
+        return res.status(404).json({
+          status: false,
+          message: "Test result not found",
+        });
+      }
+
+      res.json({
+        status: true,
+        testDetails: {
+          testID: result.id,
+          type: result.type,
+          created_at: result.created_at,
+          status: result.status,
+          result: result.result,
+          url: result.url,
+        },
+        patientSSN: SSN,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: false,
+        message: error.message,
+      });
+    }
+  },
   getTestResult: async (req, res) => {
     try {
       const { SSN, mobileNo, testID } = req.body;
@@ -151,7 +255,7 @@ const DoctorController = {
         status: true,
         SSN,
         testID: result.id,
-        tested_on: result.tested_on,
+        created_at: result.created_at,
         Status: result.status,
         url: result.url,
       });

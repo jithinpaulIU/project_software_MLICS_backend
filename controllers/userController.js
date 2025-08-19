@@ -22,7 +22,7 @@ router.post(
   validatePatientSchema,
   validatePatient
 );
-router.post("/testList", authorize(), testlistSchema, testList);
+router.post("/user/testList", authorize(), testlistSchema, testList);
 router.post("/testResult", authorize(), testResultSchema, testResult);
 router.get("/request", authorize(), getAllRequestforDoctor);
 
@@ -149,6 +149,7 @@ async function testList(req, res, next) {
     const { token, labid } = req.body;
     const decoded = jwt_decode(token);
     const [SSN, , email] = decoded.sub.split("#");
+    console.log(req.body);
 
     const status = await userService.AddRequestforlist(
       { ...req.body, SSN, email },
