@@ -1,0 +1,17 @@
+{
+  "smtp_options": {
+  "host": "smtp.ethereal.email",
+"port": 587,
+  
+  "auth": {
+    "user": "rebekah.crooks78@ethereal.email",
+    "pass": "5emXFqWMdA2NQVY4mx"
+  },
+    "from": "drkj"
+  },
+  "system_url": "https://your-healthcare-portal.com",
+  "otp_expiration_minutes": 5,
+  "max_otp_attempts": 3
+}
+
+

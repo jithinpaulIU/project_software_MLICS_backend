@@ -18,7 +18,8 @@ const Test = {
         t.status, 
         t.result_type as result,
         t.lab,
-        t.url
+        t.url,
+        t.name
       FROM 
         lab_tests t
       WHERE 
