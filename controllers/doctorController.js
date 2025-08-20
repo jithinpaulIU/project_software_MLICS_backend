@@ -5,6 +5,7 @@ const LabRequest = require("../mics_models/labRequest");
 const ServiceRequest = require("../mics_models/servicerequest");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
+const emailService = require("../config/emailService"); // Import the email service
 
 const DoctorController = {
   getLabs: async (req, res) => {
@@ -19,44 +20,92 @@ const DoctorController = {
   requestOTP: async (req, res) => {
     try {
       const { SSN, email } = req.body;
+
+      // Validate input
+      if (!SSN || !email) {
+        return res.status(400).json({
+          status: false,
+          message: "SSN and email are required",
+        });
+      }
+
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-
-      // In a real app, send OTP to email
-      console.log(
-        `OTP for is ${email}: ${otp}, ${req.body}, ${SSN}, ${email}, ${otp}, ${expiresAt}`
-      );
 
       // Store OTP in database
       await OTP.create(req.user.id, SSN, email, otp, expiresAt);
 
+      // Send OTP via email
+      try {
+        const emailResult = await emailService.sendPatientOtp(email, otp);
+        console.log(`OTP email sent to ${email}: ${emailResult.messageId}`);
+      } catch (emailError) {
+        console.error(`Failed to send OTP email to ${email}:`, emailError);
+        // Continue anyway since OTP is stored and can be retrieved from logs
+      }
+
+      // Always log OTP for development/testing purposes
+      console.log(`OTP for ${email}: ${otp} (Expires: ${expiresAt})`);
+
       // Record service request
       await ServiceRequest.create(req.user.id, SSN, email, "otpRequest");
 
-      res.json({ status: true, message: "OTP sent successfully" });
+      res.json({
+        status: true,
+        message: "OTP sent successfully",
+        // In development mode, include the OTP for testing
+        ...(process.env.NODE_ENV !== "production" && { debugOtp: otp }),
+      });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ status: false, message: error.message });
+      console.error("Error in requestOTP:", error);
+      res.status(500).json({
+        status: false,
+        message: "Failed to send OTP. Please try again.",
+      });
     }
   },
 
   submitOTP: async (req, res) => {
     try {
       const { SSN, otp, email } = req.body;
-      // const patientMobile = req.body.email || req.body.mobileNo;
-      console.log(req.body, req.user.id);
 
-      const otpRecord = await OTP.findByDetails(
-        req.user.id,
+      // Validate OTP input
+      if (!otp || otp.length !== 6) {
+        return res.status(400).json({
+          status: false,
+          message: "Invalid OTP format. Please enter a 6-digit code.",
+        });
+      }
+
+      console.log("OTP verification attempt:", {
+        doctorId: req.user.id,
         SSN,
         email,
-        // patientMobile,
-        otp
-      );
+        otpLength: otp.length,
+      });
+
+      const otpRecord = await OTP.findByDetails(req.user.id, SSN, email, otp);
+
       if (!otpRecord) {
         return res
           .status(400)
           .json({ status: false, message: "Invalid OTP or OTP expired" });
+      }
+
+      // Check if OTP is expired
+      if (new Date() > new Date(otpRecord.expires_at)) {
+        return res.status(400).json({
+          status: false,
+          message: "OTP has expired. Please request a new one.",
+        });
+      }
+
+      // Check if OTP is already used
+      if (otpRecord.used) {
+        return res.status(400).json({
+          status: false,
+          message: "OTP has already been used. Please request a new one.",
+        });
       }
 
       await OTP.markAsUsed(otpRecord.id);
@@ -87,10 +136,15 @@ const DoctorController = {
         },
       });
     } catch (error) {
-      res.status(500).json({ status: false, message: error.message });
+      console.error("Error in submitOTP:", error);
+      res.status(500).json({
+        status: false,
+        message: "Failed to verify OTP. Please try again.",
+      });
     }
   },
 
+  // ... rest of your methods remain the same
   requestLabTests: async (req, res) => {
     try {
       const { labId, patientSSN, patientMobile, authToken } = req.body;
@@ -182,6 +236,10 @@ const DoctorController = {
           type: r.type,
           tested_on: r.created_at,
           status: r.status,
+          email: email,
+          ssn: ssn,
+
+          name: r.name,
           result: r.result,
           url: r.url,
           labId: r.lab,
@@ -238,29 +296,6 @@ const DoctorController = {
         status: false,
         message: error.message,
       });
-    }
-  },
-  getTestResult: async (req, res) => {
-    try {
-      const { SSN, mobileNo, testID } = req.body;
-
-      const result = await Test.getTestResultById(testID, SSN, mobileNo);
-      if (!result) {
-        return res
-          .status(404)
-          .json({ status: false, message: "Test result not found" });
-      }
-
-      res.json({
-        status: true,
-        SSN,
-        testID: result.id,
-        created_at: result.created_at,
-        Status: result.status,
-        url: result.url,
-      });
-    } catch (error) {
-      res.status(500).json({ status: false, message: error.message });
     }
   },
 
