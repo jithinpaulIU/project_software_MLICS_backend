@@ -15,7 +15,7 @@ router.delete("/users/drdelete", AdminController.deleteDoctor);
 
 // Lab management
 router.post("/lab/addLab", AdminController.addLab);
-router.get("/labs", AdminController.listLabs);
+router.get("/users/labs", AdminController.listLabs);
 router.post("/lab/edit", AdminController.updateLab);
 router.post("/lab/delete", AdminController.deleteLab);
 
