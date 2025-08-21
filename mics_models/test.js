@@ -8,26 +8,67 @@ const Test = {
     return result.rows;
   },
 
-  getTestResults: async (patientSSN, patientMobile, authToken) => {
-    const result = await db.query(
-      `SELECT tr.id, t.name as test_name, tr.test_type as type, tr.result, 
-       tr.tested_on as tested_on, tr.status, tr.result_url as url
-       FROM test_results tr
-       JOIN tests t ON tr.test_id = t.id
-       WHERE tr.patient_ssn = $1 AND tr.patient_mobile = $2 AND tr.auth_token = $3
-       AND tr.tested_on >= NOW() - INTERVAL '30 days'`,
-      [patientSSN, patientMobile, authToken]
-    );
-    return result.rows;
+  getTestResults: async (patientSSN, patientEmail, labId) => {
+    // First get test results
+    const testQuery = `
+      SELECT 
+        t.id, 
+        t.type, 
+        t.created_at, 
+        t.status, 
+        t.result_type as result,
+        t.lab,
+        t.url,
+        t.name
+      FROM 
+        lab_tests t
+      WHERE 
+        t.ssn = $1 
+        AND t.email = $2 
+        AND t.lab = $3
+      ORDER BY 
+        t.created_at DESC
+    `;
+    const testValues = [patientSSN, patientEmail, labId];
+    const { rows: testResults } = await db.query(testQuery, testValues);
+
+    // Then get lab details
+    const labQuery = `
+      SELECT 
+        id,
+        name,
+        address,
+        email,
+        phone,
+        status,
+        total_req,
+        success_rate
+      FROM 
+        labs
+      WHERE 
+        id = $1
+    `;
+    const { rows: labDetails } = await db.query(labQuery, [labId]);
+
+    return {
+      testResults,
+      labDetails: labDetails[0] || null,
+    };
   },
 
   getTestResultById: async (testId, patientSSN, patientMobile) => {
     const result = await db.query(
-      `SELECT tr.id, t.name as test_name, tr.test_type as type, tr.result, 
-       tr.tested_on as tested_on, tr.status, tr.result_url as url
-       FROM test_results tr
-       JOIN tests t ON tr.test_id = t.id
-       WHERE tr.id = $1 AND tr.patient_ssn = $2 AND tr.patient_mobile = $3`,
+      `SELECT 
+        id,
+        type,
+        created_at,
+        status,
+        result_type as result,
+        url
+      FROM 
+        lab_tests
+      WHERE 
+        id = $1 AND ssn = $2 AND mobile_no = $3`,
       [testId, patientSSN, patientMobile]
     );
     return result.rows[0];
