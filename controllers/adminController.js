@@ -2,6 +2,7 @@ const User = require("../mics_models/user");
 const Lab = require("../mics_models/lab");
 // const Doctor = require("../mics_models/doctor");
 const LabRequest = require("../mics_models/labRequest");
+const ServiceRequest = require("../mics_models/servicerequest");
 const bcrypt = require("bcryptjs");
 
 const AdminController = {
@@ -202,29 +203,37 @@ const AdminController = {
   getDoctorRequests: async (req, res) => {
     try {
       const requests = await ServiceRequest.getAll();
+      console.log(JSON.stringify(requests, null, 2));
 
-      // Group by SSN
-      const groupedRequests = requests.reduce((acc, request) => {
-        if (!acc[request.patient_ssn]) {
-          acc[request.patient_ssn] = {
-            SSN: request.patient_ssn,
-            Request: [],
-          };
-        }
-
-        acc[request.patient_ssn].Request.push({
+      const formattedData = requests.map((request) => {
+        return {
           SSN: request.patient_ssn,
-          phone: request.patient_phone,
-          type: request.type,
-          timestamp: request.created_at,
-        });
-
-        return acc;
-      }, {});
+          patient_details: request.patient_details || {},
+          lab_test_details: request.lab_test_details || {},
+          requests: request.doctor_requests.map((dr) => ({
+            request_id: dr.request_id,
+            email: dr.email_patient,
+            type: dr.type,
+            timestamp: dr.created_at,
+            doctor: {
+              id: dr.doctor.id,
+              first_name: dr.doctor.first_name,
+              last_name: dr.doctor.last_name,
+              username: dr.doctor.username,
+              ssn: dr.doctor.ssn,
+              email: dr.doctor.email,
+              phone: dr.doctor.phone,
+              country_code: dr.doctor.country_code,
+              role: dr.doctor.role,
+              status: dr.doctor.status,
+            },
+          })),
+        };
+      });
 
       res.json({
         status: true,
-        data: Object.values(groupedRequests),
+        data: formattedData,
       });
     } catch (error) {
       res.status(500).json({ status: false, message: error.message });

@@ -20,6 +20,6 @@ router.post("/lab/edit", AdminController.updateLab);
 router.post("/lab/delete", AdminController.deleteLab);
 
 // Requests
-router.get("/user/getDoctorRequests", AdminController.getDoctorRequests);
+router.get("/users/getDoctorRequests", AdminController.getDoctorRequests);
 
 module.exports = router;
