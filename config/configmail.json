@@ -9,7 +9,7 @@
   },
     "from": "drkj"
   },
-  "system_url": "https://zesty-fudge-94f38c.netlify.app/",
+  "system_url": "https://zesty-fudge-94f38c.netlify.app/", 
   "otp_expiration_minutes": 5,
   "max_otp_attempts": 3
 }
