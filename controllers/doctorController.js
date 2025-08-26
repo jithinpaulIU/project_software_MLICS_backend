@@ -310,6 +310,40 @@ const DoctorController = {
       res.status(500).json({ status: false, message: error.message });
     }
   },
+
+  getdrmadeRequest: async (req, res) => {
+    try {
+      const doctorId = req.user.id; // Get doctor ID from authenticated user
+
+      // Get all service requests made by this doctor
+      const doctorRequests = await ServiceRequest.getByDoctorId(doctorId);
+
+      if (!doctorRequests || doctorRequests.length === 0) {
+        return res.status(404).json({
+          status: false,
+          message: "No requests found for this doctor",
+        });
+      }
+
+      // Group requests by patient SSN and enrich with patient details
+      const groupedRequests =
+        await ServiceRequest.getGroupedByPatientWithDetails(doctorId);
+
+      res.json({
+        status: true,
+        data: groupedRequests,
+        totalRequests: doctorRequests.length,
+        doctorId: doctorId,
+      });
+    } catch (error) {
+      console.error("Error in getdrmadeRequest:", error);
+      res.status(500).json({
+        status: false,
+        message: "Failed to retrieve doctor requests",
+        error: error.message,
+      });
+    }
+  },
 };
 
 module.exports = DoctorController;

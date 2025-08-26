@@ -18,6 +18,10 @@ router.post("/user/authenticateuser", DoctorController.submitOTP);
 router.post("/user/testList", DoctorController.getTestResults);
 router.post("/user/lab/TestResult", DoctorController.getTestResult);
 
+//Request made by specific doctor
+
+router.get("/user/drRequested", DoctorController.getdrmadeRequest);
+
 // Authentication request
 router.post("/auth/request", DoctorController.requestAuthentication);
 
