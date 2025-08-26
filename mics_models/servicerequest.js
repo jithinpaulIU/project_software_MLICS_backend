@@ -78,6 +78,58 @@ const ServiceRequest = {
     );
     return result.rows;
   },
+
+  getByDoctorId: async (doctorId) => {
+    try {
+      const result = await db.query(
+        `SELECT * FROM requests WHERE doctor_id = $1 ORDER BY created_at DESC`,
+        [doctorId]
+      );
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getGroupedByPatientWithDetails: async (doctorId) => {
+    try {
+      const result = await db.query(
+        `SELECT 
+        sr.patient_ssn,
+        json_agg(
+          json_build_object(
+            'request_id', sr.id,
+            'email_patient', sr.email_patient,
+            'type', sr.type,
+            'created_at', sr.created_at
+          )
+        ) as requests,
+        json_build_object(
+          'name', lt.name,
+          'email', lt.email,
+          'mobile_no', lt.mobile_no,
+          'ssn', lt.ssn
+        ) as patient_details,
+        json_build_object(
+          'name', l.name,
+          'address', l.address,
+          'email', l.email,
+          'phone', l.phone
+        ) as lab_details
+      FROM requests sr
+      LEFT JOIN lab_tests lt ON sr.patient_ssn = lt.ssn::VARCHAR
+      LEFT JOIN labs l ON lt.lab = l.id
+      WHERE sr.doctor_id = $1
+      GROUP BY sr.patient_ssn, lt.name, lt.email, lt.mobile_no, lt.ssn, 
+               l.name, l.address, l.email, l.phone
+      ORDER BY sr.patient_ssn`,
+        [doctorId]
+      );
+      return result.rows;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 module.exports = ServiceRequest;
